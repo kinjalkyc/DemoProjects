@@ -1,0 +1,197 @@
+﻿@page "/formdata"
+@inject NotificationService NotificationService
+@using System.Text.Json
+@using System.ComponentModel.DataAnnotations
+@using Radzen
+
+<div class="rz-p-0 rz-p-md-12 custom-form">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-p-4 rz-mb-6 rz-border-radius-1" Style="border: var(--rz-grid-cell-border);">
+        <RadzenLabel Text="Form Variant:" />
+        <RadzenSelectBar @bind-Value="@variant" TextProperty="Text" ValueProperty="Value" Data="@(Enum.GetValues(typeof(Variant)).Cast<Variant>().Select(t => new { Text = $"{t}", Value = t }))" Size="ButtonSize.Small" class="rz-display-none rz-display-xl-flex" />
+        <RadzenDropDown @bind-Value="@variant" TextProperty="Text" ValueProperty="Value" Data="@(Enum.GetValues(typeof(Variant)).Cast<Variant>().Select(t => new { Text = $"{t}", Value = t }))" class="rz-display-inline-flex rz-display-xl-none" />
+    </RadzenStack>
+    <RadzenTemplateForm Data="@formData" TItem="FormData" @ref="formInstance" Submit="@OnSubmit">
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeSM="6">
+                <RadzenStack>
+                    <RadzenFormField Text="Username" Variant="@variant">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@formData.Username" Name="Username" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Username" Text="Username is required" />
+                            <RadzenLengthValidator Component="Username" Value=@formData.Username Min="4" Max="15" Text="Username must be between 4 and 15 characters" />
+                        </Helper>
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Password" Variant="@variant">
+                        <ChildContent>
+                            <RadzenPassword @bind-Value="@formData.Password" Name="Password" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Password" Text="Password is required" />
+                            <RadzenLengthValidator Component="Password" Min="6" Max="100" Text="Password must be between 6 and 100 characters" />
+                        </Helper>
+
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Country" Variant="@variant">
+                        <ChildContent>
+                            <RadzenDropDown Data="@countries" @bind-Value="@formData.Country" TextProperty="Text" ValueProperty="Value" Name="Country" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Country" Text="Country is required" />
+                        </Helper>
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Gender" Variant="@variant">
+                        <ChildContent>
+                            <RadzenRadioButtonList @bind-Value="@formData.Gender" Data="@genders" Name="Gender" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Gender" Text="Gender is required" />
+                        </Helper>
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Date of Birth" Variant="@variant">
+                        <ChildContent>
+                            <RadzenDatePicker @bind-Value="@formData.DateOfBirth" Name="DateOfBirth" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="DateOfBirth" Text="Date of Birth is required" />
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenFormField Text="Phone Number" Variant="@variant">
+                        <ChildContent>
+                            <RadzenMask Mask="(***) ***-****" CharacterPattern="[0-9]" Placeholder="(000) 000-0000" Name="PhoneNumber" @bind-Value="@formData.PhoneNumber" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="PhoneNumber" Text="Phone number is required" />
+                        </Helper>
+                    </RadzenFormField>
+                    <RadzenRating @bind-Value="@formData.Rating" Min="1" Max="5" Name="Rating" />
+                    <RadzenFormField Text="language" Variant="@variant">
+                        <ChildContent>
+                            <div class="rz-p-12 rz-text-align-center">
+                                <RadzenCheckBoxList @bind-Value=@formData.language TValue="int" Name="language">
+                                    <Items>
+                                        <RadzenCheckBoxListItem Text="English" Value="1" />
+                                        <RadzenCheckBoxListItem Text="Hindi" Value="2" />
+                                        <RadzenCheckBoxListItem Text="Gujarati" Value="3" />
+                                    </Items>
+                                </RadzenCheckBoxList>
+                            </div>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="language" Text="You must select atleast one language" />
+                        </Helper>
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="Color Picker" Variant="@variant">
+                        <RadzenColorPicker @bind-Value="@formData.FavoriteColor" />
+                    </RadzenFormField>
+                    <RadzenFormField Text="Comments" Variant="@variant">
+                        <RadzenTextArea @bind-Value="@formData.Comments" />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeSM="6">
+                <RadzenStack AlignItems="AlignItems.Center">
+                    <RadzenCard>
+                        <RadzenFileInput @bind-Value="@formData.ProfilePicture"
+                                         @bind-FileName="@fileName"
+                                         @bind-FileSize="@fileSize"
+                                         TValue="string"
+                                         Style="width: 100%"
+                                         InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "select file" } })" />
+                    </RadzenCard>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Submit" Style="margin-top: 20px;" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenTemplateForm>
+</div>
+
+@code {
+    Variant variant = Variant.Outlined;
+
+    public class FormData
+    {
+        [Required]
+        [StringLength(15, ErrorMessage = "Username must be between 4 and 15 characters", MinimumLength = 4)]
+        public string Username { get; set; }
+
+        [Required]
+        [StringLength(100, ErrorMessage = "Password must be between 6 and 100 characters", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
+        [Required]
+        public string Country { get; set; }
+
+        [Required]
+        public string Gender { get; set; }
+
+        [Required]
+        public DateTime DateOfBirth { get; set; }
+
+        public string ProfilePicture { get; set; }
+
+        [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5")]
+        public int Rating { get; set; }
+
+        public string FavoriteColor { get; set; }
+
+        public string Comments { get; set; }
+
+        public IEnumerable<int> language = new int[] { 1 };
+
+        public string PhoneNumber { get; set; }
+    }
+
+    FormData formData = new FormData();
+    string fileName;
+    long? fileSize;
+
+    List<dynamic> countries = new List<dynamic>
+    {
+        new { Text = "India", Value = "IN" },
+        new { Text = "United States", Value = "US" },
+        new { Text = "Canada", Value = "CA" },
+        new { Text = "United Kingdom", Value = "UK" }
+    };
+
+    List<string> genders = new List<string> { "Male", "Female", "Other" };
+
+    RadzenTemplateForm<FormData> formInstance;
+
+    void OnSubmit()
+    {
+        Console.WriteLine($"Form is valid: {formInstance.IsValid}");
+        if (formInstance.IsValid)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Form Submitted",
+                    Detail = JsonSerializer.Serialize(formData, new JsonSerializerOptions { WriteIndented = true })
+                });
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validation Failed",
+                    Detail = "Please correct the form errors and try again."
+                });
+
+
+        }
+    }
+
+}

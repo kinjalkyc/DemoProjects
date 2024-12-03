@@ -1,0 +1,58 @@
+﻿@page "/fetchdata"
+@using RadzenBlazorRepo.Shared
+@inject HttpClient Http
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <RadzenDataGrid Data="@forecasts" TItem="WeatherForecast" AllowFiltering = "true" AllowSorting = "true" AllowColumnResize = "true" AllowPaging="true" PageSize="5">
+        <Columns>
+            <RadzenDataGridColumn TItem="WeatherForecast" Property="Date" Title="Date">
+                <Template Context="forecast">@forecast.Date.ToShortDateString()</Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureC" Title="Temp. (C)"></RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureF" Title="Temp. (F)"></RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WeatherForecast" Property="Summary" Title="Summary"></RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+      
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+    }
+}

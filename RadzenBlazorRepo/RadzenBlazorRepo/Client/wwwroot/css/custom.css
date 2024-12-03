@@ -1,0 +1,30 @@
+﻿/* Custom CSS for Radzen checkbox to look like a normal checkbox */
+.custom-checkbox .rz-checkbox-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+    .custom-checkbox .rz-checkbox-box.rz-state-checked {
+        background-color: #007bff; /* Bootstrap blue */
+        border-color: #007bff;
+    }
+
+        .custom-checkbox .rz-checkbox-box.rz-state-checked::after {
+            content: "";
+            display: block;
+            position: relative;
+            left: 4px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+.custom-checkbox .rz-checkbox-label {
+    padding-left: 5px; /* Adjust space between checkbox and label */
+}
